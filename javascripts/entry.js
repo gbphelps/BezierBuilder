@@ -166,12 +166,8 @@ const setLineClick = line => {
       line.data.end.data.prev.point = pNew;
 
 
-      const lNew = initLine(
-        x,
-        line.data.end.getAttribute('cx'),
-        y,
-        line.data.end.getAttribute('cy')
-      )
+      const last = getCoords(line.data.end);
+      const lNew = initLine(x, last.x, y, last.y);
 
       setLineClick(lNew);
       lNew.data.start = pNew;
@@ -190,20 +186,20 @@ const setLineClick = line => {
 
 const pushPoint = e => {
   const { top, left } = C.getBoundingClientRect();
-  const y = e.clientY - top;
-  const x = e.clientX - left;
+  const yNxt = e.clientY - top;
+  const xNxt = e.clientX - left;
 
-  const p = initPoint(x,y);
+  const p = initPoint(xNxt,yNxt);
   setDrag(p);
 
   if (prevPoint){
-    const xL = +prevPoint.getAttribute('cx');
-    const yL = +prevPoint.getAttribute('cy');
-    const line = initLine(xL,x,yL,y);
+    const { x, y } = getCoords(prevPoint);
+    console.log({x,y})
+    const line = initLine(x,xNxt,y,yNxt);
+    console.log(line);
     line.data.start = prevPoint;
     line.data.end = p;
     setLineClick(line);
-
 
     p.data.prev.line = line;
     p.data.prev.point = prevPoint;
@@ -223,16 +219,48 @@ const pushPoint = e => {
 
 
 const initPoint = (x,y) => {
-  const p =       document.createElementNS('http://www.w3.org/2000/svg','circle');
+  console.log({x,y})
+  const p = get('circle');
+  p.classList.add('point');
+  const outline = get('circle');
+  outline.classList.add('pointSelector');
+  const pointGroup = get('g');
 
-  set(p,{cx: x, cy: y, r: 5, stroke: 'white', 'stroke-width': .5});
-  p.data = {};
-  p.data.prev = {};
-  p.data.next = {};
-  activate(p);
-  return p;
+  set(p,{
+    cx: x,
+    cy: y,
+    r: 4,
+    fill: 'white'
+  });
+
+  set(outline,{
+    cx: x,
+    cy: y,
+    r: 10,
+    stroke: 'white',
+    'stroke-width': .5,
+    fill: 'transparent'
+  });
+  pointGroup.data = {};
+  pointGroup.data.prev = {};
+  pointGroup.data.next = {};
+  activate(pointGroup);
+  pointGroup.appendChild(p);
+  pointGroup.appendChild(outline);
+  return pointGroup;
 }
 
+getCoords = pointGroup => {
+  const x = pointGroup.firstChild.getAttribute('cx');
+  const y = pointGroup.firstChild.getAttribute('cy');
+  return {x, y};
+}
+
+setCoords = (pointGroup, coords) => {
+  Array.from(pointGroup.children).forEach(child =>{
+    set(child,coords)
+  })
+}
 
 
 
@@ -252,7 +280,9 @@ const setDrag = p => {
       const dX = e.clientX - x;
       const dY = e.clientY - y;
 
-      let [xP, yP] = [+p.getAttribute('cx'), +p.getAttribute('cy')];
+      const coords = getCoords(p);
+      let xP = +coords.x;
+      let yP = +coords.y;
 
       const {top, bottom, left, right} = C.getBoundingClientRect();
 
@@ -266,8 +296,7 @@ const setDrag = p => {
         if (yP > h){ yP = h }else if (yP < 0){ yP = 0}
       }
 
-      p.setAttribute('cx',xP);
-      p.setAttribute('cy',yP);
+      setCoords(p,{cx: xP, cy: yP});
 
       if (p.data.next.line){
         setLine(p.data.next.line,{x1: xP, y1: yP})
@@ -294,15 +323,12 @@ const setDrag = p => {
 
 const unshiftPoint = e => {
   const { top, left } = C.getBoundingClientRect();
-  const y = e.clientY - top;
-  const x = e.clientX - left;
-  const p = initPoint(x,y);
+  const yNxt = e.clientY - top;
+  const xNxt = e.clientX - left;
+  const p = initPoint(xNxt,yNxt);
   setDrag(p);
-
-  const l = initLine(
-   x, head.getAttribute('cx'),
-   y, head.getAttribute('cy')
-  );
+  const {x, y} = getCoords(head);
+  const l = initLine(xNxt, x, yNxt, y);
   setLineClick(l);
 
   head.data.prev.point = p;
@@ -335,8 +361,8 @@ const getPoints = () => {
   let node = head;
   const points = [];
   while (node) {
-    const x = +node.getAttribute('cx');
-    const y = +node.getAttribute('cy');
+    const x = +node.firstChild.getAttribute('cx');
+    const y = +node.firstChild.getAttribute('cy');
     points.push({x,y});
     node = node.data.next.point;
   }
@@ -364,8 +390,7 @@ document.addEventListener('keydown',e=>{
      nxt.point.data.prev = prv;
      prv.point.data.next = nxt;
      document.getElementById('lines').removeChild(nxt.line);
-     const x = nxt.point.getAttribute('cx');
-     const y = nxt.point.getAttribute('cy');
+     const {x,y} = getCoords(nxt.point);
      setLine(prv.line,{x2: x, y2: y})
      prv.line.data.end = nxt.point;
      prv.point.data.next.line = prv.line;

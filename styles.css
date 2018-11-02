@@ -45,8 +45,19 @@
   z-index: 4;
 }
 
-.active{
-  fill: yellow;
+
+
+
+.pointSelector{
+  transition: r .3s, stroke .3s;
+}
+.active > .pointSelector{
+  r: 18;
+  stroke: lime;
+}
+
+.active > .point{
+  fill: lime;
 }
 
 html,body{

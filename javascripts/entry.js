@@ -27,6 +27,7 @@ document.addEventListener('DOMContentLoaded',()=>{
 const buttonListener = e => {
   window.cancelAnimationFrame(frame);
   const curve = bezier(getPoints(),true);
+  C.style['z-index'] = 3;
 
   let p = [null];
   let segments = 100;
@@ -51,14 +52,11 @@ const buttonListener = e => {
         i = 0;
         ctx.clearRect(0,0,w,h);
         refreshBez();
+        C.style['z-index'] = 1;
      }
   }
  frame = window.requestAnimationFrame(step);
 }
-
-
-
-
 
 const resize = () => {
   h = window.innerHeight;
@@ -88,7 +86,7 @@ const P = (p, options) => {
   };
   if (options) Object.assign(style, options);
   ctx.beginPath();
-  ctx.arc(p.x, p.y, 4, 0, Math.PI*2);
+  ctx.arc(p.x, p.y, 3, 0, Math.PI*2);
   Object.assign(ctx, style);
   ctx.stroke();
   ctx.fill();

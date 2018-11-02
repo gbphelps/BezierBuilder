@@ -1,11 +1,14 @@
 #c{
   margin: 0;
   padding: 0;
+  position: absolute;
+  z-index: 1;
 }
 
 #container{
   height: 100vh;
   width: 100vw;
+  position: absolute;
 }
 /* these need to be superimposed always */
 
@@ -13,7 +16,7 @@
 
 #overlay{
   position: absolute;
-  z-index: 100;
+  z-index: 2;
   margin:0;
   padding: 0;
 }
@@ -39,7 +42,7 @@
   right: 0;
   bottom: 40px;
   cursor: pointer;
-  z-index: 1000;
+  z-index: 4;
 }
 
 .active{

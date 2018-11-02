@@ -50,7 +50,26 @@
 
 .pointSelector{
   transition: r .3s, stroke .3s;
+  animation-name: selector-activate;
+  animation-duration: .3s;
 }
+
+@keyframes selector-activate{
+  0% {r: 10; stroke: white}
+  100%{r: 18; stroke: lime}
+}
+
+@keyframes point-activate{
+  0% { fill: white; }
+  100% { fill: lime; }
+}
+
+.point{
+  transition: fill .3s;
+  animation-name: point-activate;
+  animation-duration: .3s;
+}
+
 .active > .pointSelector{
   r: 18;
   stroke: lime;

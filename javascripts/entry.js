@@ -28,6 +28,7 @@ const buttonListener = e => {
   window.cancelAnimationFrame(frame);
   const curve = bezier(getPoints(),true);
   C.style['z-index'] = 3;
+  deactivate();
 
   let p = [null];
   let segments = 100;
@@ -159,6 +160,7 @@ const setLineClick = line => {
       const x = e.clientX - left;
       const pNew = initPoint(x,y);
       setDrag(pNew);
+      dragEvent(pNew)(e);
       pNew.data.prev.point = line.data.start;
       pNew.data.prev.line = line;
       pNew.data.next.point = line.data.end;
@@ -194,9 +196,7 @@ const pushPoint = e => {
 
   if (prevPoint){
     const { x, y } = getCoords(prevPoint);
-    console.log({x,y})
     const line = initLine(x,xNxt,y,yNxt);
-    console.log(line);
     line.data.start = prevPoint;
     line.data.end = p;
     setLineClick(line);
@@ -219,12 +219,14 @@ const pushPoint = e => {
 
 
 const initPoint = (x,y) => {
-  console.log({x,y})
   const p = get('circle');
   p.classList.add('point');
   const outline = get('circle');
   outline.classList.add('pointSelector');
   const pointGroup = get('g');
+
+  const tag = document.createElement('div');
+  tag.classList.add('tag');
 
   set(p,{
     cx: x,
@@ -247,6 +249,7 @@ const initPoint = (x,y) => {
   activate(pointGroup);
   pointGroup.appendChild(p);
   pointGroup.appendChild(outline);
+  pointGroup.appendChild(tag);
   return pointGroup;
 }
 
@@ -264,60 +267,64 @@ setCoords = (pointGroup, coords) => {
 
 
 
-const setDrag = p => {
-  p.addEventListener('mousedown', e => {
-    ctx.clearRect(0,0,w,h);
-    activate(p);
-    refreshBez();
 
+
+const dragEvent = p => e => {
+  ctx.clearRect(0,0,w,h);
+  activate(p);
+  refreshBez();
+
+  e.preventDefault();
+  e.stopPropagation();
+  let [x, y] = [e.clientX, e.clientY];
+
+  const drag = e => {
     e.preventDefault();
     e.stopPropagation();
-    let [x, y] = [e.clientX, e.clientY];
+    const dX = e.clientX - x;
+    const dY = e.clientY - y;
 
-    const drag = e => {
-      e.preventDefault();
-      e.stopPropagation();
-      const dX = e.clientX - x;
-      const dY = e.clientY - y;
+    const coords = getCoords(p);
+    let xP = +coords.x;
+    let yP = +coords.y;
 
-      const coords = getCoords(p);
-      let xP = +coords.x;
-      let yP = +coords.y;
+    const {top, bottom, left, right} = C.getBoundingClientRect();
 
-      const {top, bottom, left, right} = C.getBoundingClientRect();
-
-      if (x < right && x > left){
-        xP += dX;
-        if (xP > w){ xP = w }else if (xP < 0){ xP = 0}
-      }
-
-      if (y < bottom && y > top){
-        yP += dY;
-        if (yP > h){ yP = h }else if (yP < 0){ yP = 0}
-      }
-
-      setCoords(p,{cx: xP, cy: yP});
-
-      if (p.data.next.line){
-        setLine(p.data.next.line,{x1: xP, y1: yP})
-      }
-
-      if (p.data.prev.line){
-        setLine(p.data.prev.line,{x2: xP, y2: yP})
-      }
-
-      refreshBez();
-      [x, y] = [e.clientX, e.clientY];
+    if (x < right && x > left){
+      xP += dX;
+      if (xP > w){ xP = w }else if (xP < 0){ xP = 0}
     }
 
+    if (y < bottom && y > top){
+      yP += dY;
+      if (yP > h){ yP = h }else if (yP < 0){ yP = 0}
+    }
 
-    document.addEventListener('mousemove',drag);
-    document.addEventListener('mouseup',()=>{
-      e.preventDefault();
-      e.stopPropagation();
-      document.removeEventListener('mousemove',drag)
-    },{once:true});
-  });
+    setCoords(p,{cx: xP, cy: yP});
+
+    if (p.data.next.line){
+      setLine(p.data.next.line,{x1: xP, y1: yP})
+    }
+
+    if (p.data.prev.line){
+      setLine(p.data.prev.line,{x2: xP, y2: yP})
+    }
+
+    refreshBez();
+    [x, y] = [e.clientX, e.clientY];
+  }
+
+
+  document.addEventListener('mousemove',drag);
+  document.addEventListener('mouseup',()=>{
+    e.preventDefault();
+    e.stopPropagation();
+    document.removeEventListener('mousemove',drag)
+  },{once:true});
+}
+
+const setDrag = p => {
+  p.addEventListener('mousedown', dragEvent(p));
 }
 
 
@@ -375,9 +382,16 @@ let frame;
 
 let active = null;
 const activate = point => {
-  if (active) active.classList.remove('active');
+  deactivate();
   active = point;
   point.classList.add('active');
+}
+
+const deactivate = () => {
+  if (active){
+    active.classList.remove('active');
+    active = null;
+  }
 }
 
 document.addEventListener('keydown',e=>{

@@ -1,7 +1,5 @@
 
-
-let C, svg, bezierSVG, guides, ctx, h, w;
-
+let C, svg, bezierSVG, ctx, h, w;
 let head = null;
 let prevPoint = null;
 
@@ -9,7 +7,6 @@ document.addEventListener('DOMContentLoaded',()=>{
   C = document.getElementById('c');
   svg = document.getElementById('overlay');
   bezierSVG = document.getElementById('bezier');
-  guides = document.getElementById('guides');
   ctx = C.getContext('2d');
   window.addEventListener('resize',resize);
   resize();
@@ -23,14 +20,18 @@ document.addEventListener('DOMContentLoaded',()=>{
     refreshBez();
   })
 
-  document.getElementById('getBez').addEventListener('click',()=>{
-    window.cancelAnimationFrame(frame);
-    const curve = bezier(getPoints(),true);
+  document.getElementById('getBez').addEventListener('click',buttonListener);
+})
 
-    let p = [null];
-    let segments = 100;
-    let lines = [];
-    let i = 0;
+
+const buttonListener = e => {
+  window.cancelAnimationFrame(frame);
+  const curve = bezier(getPoints(),true);
+
+  let p = [null];
+  let segments = 100;
+  let lines = [];
+  let i = 0;
 
     const step = () => {
       ctx.clearRect(0,0,w,h);
@@ -49,14 +50,19 @@ document.addEventListener('DOMContentLoaded',()=>{
         lines = [];
         i = 0;
         ctx.clearRect(0,0,w,h);
+        const guideLines = document.getElementById('guideLines');
+        const guidePoints = document.getElementById('guidePoints');
+        svg.removeChild(guideLines);
+        svg.removeChild(guidePoints);
         refreshBez();
      }
   }
-   frame = window.requestAnimationFrame(step);
-  })
+ frame = window.requestAnimationFrame(step);
+}
 
 
-})
+
+
 
 const resize = () => {
   h = window.innerHeight;
@@ -94,11 +100,36 @@ const P = (p, options) => {
 
 const bezier = (arr, track=false) => t => {
   let count = 0;
+  let guidePoints, guideLines;
+
+  if (track){
+    guidePoints = document.getElementById('guidePoints');
+    guideLines = document.getElementById('guideLines');
+    if (guidePoints) svg.removeChild(guidePoints);
+    if (guideLines) svg.removeChild(guideLines);
+    guidePoints = get('g');
+    guideLines = get('g');
+    guidePoints.id = 'guidePoints';
+    guideLines.id = 'guideLines';
+    svg.appendChild(guidePoints);
+    svg.appendChild(guideLines);
+  }
 
   const _bezier = arr => t => {
-    if (arr.length === 1) return arr[0];
+    if (arr.length === 1){
+      if (track){
+        const p = get('circle');
+        set(p,{cx: arr[0].x, cy: arr[0].y, r: 3, fill: 'white'});
+        guidePoints.appendChild(p);
+      }
+      return arr[0];
+    }
     const result = [];
-    if (track) P(arr[0])
+    if (track){
+      const p = get('circle');
+      set(p,{cx: arr[0].x, cy: arr[0].y, r: 3, fill: 'white'});
+      guidePoints.appendChild(p);
+    }
     for (let i=0; i<arr.length-1; i++){
       const p0 = arr[i];
       const p1 = arr[i+1];
@@ -106,8 +137,13 @@ const bezier = (arr, track=false) => t => {
       const y = p0.y + (p1.y - p0.y)*t;
 
       if (track){
-        L(p0,p1);
-        P(p1);
+        const p = get('circle');
+        set(p,{cx: p1.x, cy: p1.y, r: 3, fill: 'white'});
+        guidePoints.appendChild(p);
+
+        const l = get('line');
+        set(l,{x1: p0.x, x2: p1.x, y1: p0.y, y2: p1.y, stroke: 'white','stroke-width': .5});
+        guideLines.appendChild(l);
       }
       result.push({x,y});
     }
@@ -115,7 +151,8 @@ const bezier = (arr, track=false) => t => {
   return _bezier(result,track)(t);
   }
 
-  return _bezier(arr)(t);
+  const val = _bezier(arr)(t);
+  return val;
 }
 
 const get = el => document.createElementNS('http://www.w3.org/2000/svg',el);

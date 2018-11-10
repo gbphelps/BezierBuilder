@@ -227,6 +227,15 @@ const initPoint = (x,y) => {
   const outline = get('circle');
   outline.classList.add('pointSelector');
   const pointGroup = get('g');
+  const t = get('text');
+
+  set(t,{
+    fill: 'white',
+    class: 'small',
+    x,
+    y
+  })
+  t.textContent = 'hello';
 
   set(p,{
     cx: x,
@@ -249,6 +258,7 @@ const initPoint = (x,y) => {
   activate(pointGroup);
   pointGroup.appendChild(p);
   pointGroup.appendChild(outline);
+  pointGroup.appendChild(t);
   return pointGroup;
 }
 

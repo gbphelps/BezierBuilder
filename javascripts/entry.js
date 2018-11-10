@@ -229,9 +229,6 @@ const initPoint = (x,y) => {
   const pointGroup = get('g');
   const t = get('text');
 
-  pointGroup.x = x;
-  pointGroup.y = y;
-
   set(t,{
     fill: 'white',
     class: 'small',})
@@ -260,6 +257,7 @@ const initPoint = (x,y) => {
   pointGroup.appendChild(p);
   pointGroup.appendChild(outline);
   pointGroup.appendChild(t);
+  setCoords(pointGroup,{x,y});
   return pointGroup;
 }
 
@@ -270,8 +268,9 @@ getCoords = pointGroup => {
 }
 
 setCoords = (pointGroup, coords) => {
-  Object.assign(pointGroup, coords)
-  pointGroup.setAttribute('transform', `translate(${coords.x},${coords.y})`)
+  Object.assign(pointGroup, coords);
+  pointGroup.setAttribute('transform', `translate(${coords.x},${coords.y})`);
+  pointGroup.getElementsByTagName('text')[0].textContent = `(${coords.x}, ${coords.y})`;
 }
 
 

@@ -231,7 +231,9 @@ const initPoint = (x,y) => {
 
   set(t,{
     fill: 'white',
-    class: 'small',})
+    class: 'svg-txt',
+    x: 15,
+    y: 5})
   t.textContent = 'hello';
 
   set(p,{

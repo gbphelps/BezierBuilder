@@ -229,29 +229,30 @@ const initPoint = (x,y) => {
   const pointGroup = get('g');
   const t = get('text');
 
+  pointGroup.x = x;
+  pointGroup.y = y;
+
   set(t,{
     fill: 'white',
-    class: 'small',
-    x,
-    y
-  })
+    class: 'small',})
   t.textContent = 'hello';
 
   set(p,{
-    cx: x,
-    cy: y,
     r: 4,
     fill: 'white'
   });
 
   set(outline,{
-    cx: x,
-    cy: y,
     r: 10,
     stroke: 'white',
     'stroke-width': .5,
     fill: 'transparent'
   });
+
+  set(pointGroup,{
+    transform: `translate(${x},${y})`
+  })
+
   pointGroup.data = {};
   pointGroup.data.prev = {};
   pointGroup.data.next = {};
@@ -263,15 +264,14 @@ const initPoint = (x,y) => {
 }
 
 getCoords = pointGroup => {
-  const x = pointGroup.firstChild.getAttribute('cx');
-  const y = pointGroup.firstChild.getAttribute('cy');
+  const x = pointGroup.x
+  const y = pointGroup.y
   return {x, y};
 }
 
 setCoords = (pointGroup, coords) => {
-  Array.from(pointGroup.children).forEach(child =>{
-    set(child,coords)
-  })
+  Object.assign(pointGroup, coords)
+  pointGroup.setAttribute('transform', `translate(${coords.x},${coords.y})`)
 }
 
 
@@ -309,7 +309,7 @@ const dragEvent = p => e => {
       if (yP > h){ yP = h }else if (yP < 0){ yP = 0}
     }
 
-    setCoords(p,{cx: xP, cy: yP});
+    setCoords(p,{x: xP, y: yP});
 
     if (p.data.next.line){
       setLine(p.data.next.line,{x1: xP, y1: yP})
@@ -377,9 +377,7 @@ const getPoints = () => {
   let node = head;
   const points = [];
   while (node) {
-    const x = +node.firstChild.getAttribute('cx');
-    const y = +node.firstChild.getAttribute('cy');
-    points.push({x,y});
+    points.push(getCoords(node));
     node = node.data.next.point;
   }
   return(points);

@@ -86,7 +86,6 @@ html,body{
 }
 
 
-
 .vizLine{
   stroke: white;
   stroke-width: .5;
@@ -107,4 +106,13 @@ body{
 
 circle{
   cursor: pointer;
+}
+
+.instructions{
+  color: white;
+  position: absolute;
+  z-index: 0;
+  width: 300px;
+  font-family: sans-serif;
+  padding: 20px;
 }

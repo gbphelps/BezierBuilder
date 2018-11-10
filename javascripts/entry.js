@@ -97,7 +97,10 @@ const bezier = (arr, track=false) => t => {
   let count = 0;
 
   const _bezier = arr => t => {
-    if (arr.length === 1) return arr[0];
+    if (arr.length === 1){
+      if (track) P(arr[0]);
+      return arr[0]
+    }
     const result = [];
     if (track) P(arr[0])
     for (let i=0; i<arr.length-1; i++){
@@ -225,9 +228,6 @@ const initPoint = (x,y) => {
   outline.classList.add('pointSelector');
   const pointGroup = get('g');
 
-  const tag = document.createElement('div');
-  tag.classList.add('tag');
-
   set(p,{
     cx: x,
     cy: y,
@@ -249,7 +249,6 @@ const initPoint = (x,y) => {
   activate(pointGroup);
   pointGroup.appendChild(p);
   pointGroup.appendChild(outline);
-  pointGroup.appendChild(tag);
   return pointGroup;
 }
 

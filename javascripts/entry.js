@@ -227,6 +227,7 @@ const initPoint = (x,y) => {
   const outline = get('circle');
   outline.classList.add('pointSelector');
   const pointGroup = get('g');
+  pointGroup.classList.add('pointGroup');
   const t = get('text');
 
   set(t,{

@@ -96,10 +96,6 @@ html,body{
   stroke-width: 10
 }
 
-.lineGroup:hover .vizLine{
-  stroke-width: 1;
-}
-
 body{
   background:black;
 }

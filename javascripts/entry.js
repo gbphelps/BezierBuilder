@@ -177,6 +177,7 @@ const setLineClick = line => {
       setLineClick(lNew);
       lNew.data.start = pNew;
       lNew.data.end = line.data.end;
+      ghost(lNew);
       line.data.end.data.prev.line = lNew;
       document.getElementById('lines').appendChild(lNew);
 
@@ -203,6 +204,7 @@ const pushPoint = e => {
     line.data.start = prevPoint;
     line.data.end = p;
     setLineClick(line);
+    ghost(line);
 
     p.data.prev.line = line;
     p.data.prev.point = prevPoint;
@@ -358,6 +360,7 @@ const unshiftPoint = e => {
   head = p;
   document.getElementById('lines').appendChild(l);
   document.getElementById('points').appendChild(p);
+  ghost(l);
 }
 
 const refreshBez = () => {
@@ -432,3 +435,34 @@ document.addEventListener('keydown',e=>{
   refreshBez();
   active = null;
 })
+
+
+
+const ghost = line => {
+  const p = get('circle');
+  line.addEventListener('mouseleave',()=>{
+    line.removeChild(p);
+  })
+  line.addEventListener('mouseenter',e=>{
+    const p1 = line.data.start
+    const p2 = line.data.end
+    const m = (p2.y - p1.y)/(p2.x - p1.x);
+    const x = (m * (e.clientY - p1.y) + m * m * p1.x + e.clientX)/(m * m + 1);
+    const y = m * (x - p1.x) + p1.y;
+    set(p,{
+      r: 4,
+      fill: 'red',
+      transform: `translate(${x}, ${y})`
+    })
+
+    line.addEventListener('mousemove',e=>{
+      const p1 = line.data.start
+      const p2 = line.data.end
+      const m = (p2.y - p1.y)/(p2.x - p1.x);
+      const x = (m * (e.clientY - p1.y) + m * m * p1.x + e.clientX)/(m * m + 1);
+      const y = m * (x - p1.x) + p1.y;
+      set(p,{transform: `translate(${x},${y})`})
+    })
+    line.insertBefore(p, line.firstChild);
+  })
+}

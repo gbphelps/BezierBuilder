@@ -12,7 +12,7 @@ document.addEventListener('DOMContentLoaded',()=>{
   resize();
 
   svg.addEventListener('mousedown',e=>{
-    if (active && active === head){
+    if (active && active === head && head.data.next.point){
        unshiftPoint(e)
     } else {
       pushPoint(e)
@@ -157,11 +157,12 @@ const setLineClick = line => {
   line.addEventListener('mousedown',e=>{
       e.preventDefault();
       e.stopPropagation();
-      const { top, left } =
-            C.getBoundingClientRect();
-      const y = e.clientY - top;
-      const x = e.clientX - left;
-      const pNew = initPoint(x,y);
+      const p1 = line.data.start
+      const p2 = line.data.end
+      const m = (p2.y - p1.y)/(p2.x - p1.x);
+      const x = (m * (e.clientY - p1.y) + m * m * p1.x + e.clientX)/(m * m + 1);
+      const y = m * (x - p1.x) + p1.y;
+      const pNew = initPoint(Math.round(x),Math.round(y));
       setDrag(pNew);
       dragEvent(pNew)(e);
       pNew.data.prev.point = line.data.start;

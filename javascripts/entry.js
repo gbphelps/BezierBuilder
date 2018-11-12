@@ -464,6 +464,6 @@ const ghost = line => {
       const y = m * (x - p1.x) + p1.y;
       set(p,{transform: `translate(${x},${y})`})
     })
-    line.insertBefore(p, line.firstChild);
+    line.appendChild(p)
   })
 }

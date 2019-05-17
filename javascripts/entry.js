@@ -3,6 +3,7 @@ let C, svg, bezierSVG, ctx, h, w;
 let head = null;
 let prevPoint = null;
 
+
 document.addEventListener('DOMContentLoaded',()=>{
   C = document.getElementById('c');
   svg = document.getElementById('overlay');
@@ -21,11 +22,16 @@ document.addEventListener('DOMContentLoaded',()=>{
   })
 
   document.getElementById('getBez').addEventListener('click',buttonListener);
+  document.getElementById('x').addEventListener('click',()=>{
+    const instructions = document.getElementById('instructions');
+    instructions.parentNode.removeChild(instructions)
+  })
 })
 
 
 const buttonListener = e => {
   window.cancelAnimationFrame(frame);
+  if (!getPoints().length) return;
   const curve = bezier(getPoints(),true);
   C.style['z-index'] = 3;
   deactivate();
@@ -70,20 +76,21 @@ const resize = () => {
 }
 
 const L = (p0, p1, options) => {
-  const style = {strokeStyle: 'white', lineWidth: .5};
+  const style = {strokeStyle: 'black', lineWidth: .5};
   if (options) Object.assign(style, options);
   ctx.beginPath();
   ctx.moveTo(p0.x,p0.y);
   ctx.lineTo(p1.x,p1.y);
+  ctx.strokeStyle="black"
   Object.assign(ctx, style);
   ctx.stroke();
 }
 
 const P = (p, options) => {
   const style = {
-    strokeStyle: 'white',
+    strokeStyle: 'black',
     lineWidth: .5,
-    fillStyle: 'white'
+    fillStyle: 'black'
   };
   if (options) Object.assign(style, options);
   ctx.beginPath();
@@ -234,7 +241,7 @@ const initPoint = (x,y) => {
   const t = get('text');
 
   set(t,{
-    fill: 'white',
+    fill: '#999',
     class: 'svg-txt',
     x: 15,
     y: 5})
@@ -242,12 +249,12 @@ const initPoint = (x,y) => {
 
   set(p,{
     r: 4,
-    fill: 'white'
+    fill: '#ccc'
   });
 
   set(outline,{
     r: 10,
-    stroke: 'white',
+    stroke: '#ccc',
     'stroke-width': .5,
     fill: 'transparent'
   });
@@ -374,6 +381,7 @@ const refreshBez = () => {
       const p = bez(i/100);
       const path = bezierSVG.getAttribute('d');
       bezierSVG.setAttribute('d',`${path} ${p.x} ${p.y}`)
+      bezierSVG.setAttribute('stroke', 'black');
     }
   }
 }
@@ -452,7 +460,7 @@ const ghost = line => {
     const y = m * (x - p1.x) + p1.y;
     set(p,{
       r: 4,
-      fill: 'red',
+      fill: 'tomato',
       transform: `translate(${x}, ${y})`
     })
 

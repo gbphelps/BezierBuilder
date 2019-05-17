@@ -75,7 +75,6 @@ pickle-email-*.html
 
 ## Webpack:
 
-bundle.js
 bundle.js.map
 
 ### Node ###
